@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Off-Campus Hostel Booking</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+    <div id="app" class="container mx-auto p-4">
+        <!-- Navigation -->
+        <nav class="bg-blue-600 p-4 rounded-lg mb-6">
+            <div class="flex justify-between items-center">
+                <h1 class="text-white text-2xl font-bold">Hostel Booking Portal</h1>
+                <div id="nav-buttons">
+                    <button onclick="showSection('student')" class="text-white px-4 py-2 hover:bg-blue-700 rounded">Student Portal</button>
+                    <button onclick="showSection('agent')" class="text-white px-4 py-2 hover:bg-blue-700 rounded">Agent Portal</button>
+                    <button onclick="showSection('landlord')" class="text-white px-4 py-2 hover:bg-blue-700 rounded">Landlord Portal</button>
+                    <button onclick="showSection('admin')" class="text-white px-4 py-2 hover:bg-blue-700 rounded">Admin Portal</button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Student Portal -->
+        <div id="student-section" class="hidden">
+            <h2 class="text-2xl font-bold mb-4">Student Portal</h2>
+            <div class="mb-4">
+                <input id="search-input" type="text" placeholder="Search by location or name" class="w-full p-2 border rounded">
+            </div>
+            <div id="hostel-list" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+        </div>
+
+        <!-- Agent Portal -->
+        <div id="agent-section" class="hidden">
+            <h2 class="text-2xl font-bold mb-4">Agent Portal</h2>
+            <p class="mb-4">View and manage hostel bookings.</p>
+            <div id="agent-bookings" class="space-y-4"></div>
+        </div>
+
+        <!-- Landlord Portal -->
+        <div id="landlord-section" class="hidden">
+            <h2 class="text-2xl font-bold mb-4">Landlord/Caretaker Portal</h2>
+            <div id="landlord-auth" class="mb-6">
+                <div id="landlord-login" class="hidden">
+                    <h3 class="text-xl font-bold mb-2">Landlord Login</h3>
+                    <form id="login-form" class="space-y-4">
+                        <input id="login-email" type="email" placeholder="Email" class="w-full p-2 border rounded" required>
+                        <input id="login-password" type="password" placeholder="Password" class="w-full p-2 border rounded" required>
+                        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Login</button>
+                        <p class="text-sm">No account? <a href="#" onclick="showLandlordSignup()" class="text-blue-600">Sign up</a></p>
+                    </form>
+                </div>
+                <div id="landlord-signup" class="hidden">
+                    <h3 class="text-xl font-bold mb-2">Landlord Signup</h3>
+                    <form id="signup-form" class="space-y-4">
+                        <input id="signup-email" type="email" placeholder="Email" class="w-full p-2 border rounded" required>
+                        <input id="signup-password" type="password" placeholder="Password" class="w-full p-2 border rounded" required>
+                        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Sign Up</button>
+                        <p class="text-sm">Already have an account? <a href="#" onclick="showLandlordLogin()" class="text-blue-600">Login</a></p>
+                    </form>
+                </div>
+                <div id="landlord-verification" class="hidden">
+                    <p class="text-red-600">Your account is awaiting admin verification.</p>
+                </div>
+            </div>
+            <div id="landlord-content" class="hidden">
+                <form id="hostel-form" class="mb-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <input id="hostel-name" type="text" placeholder="Hostel Name" class="p-2 border rounded" required>
+                        <input id="hostel-location" type="text" placeholder="Location" class="p-2 border rounded" required>
+                        <input id="hostel-units" type="number" placeholder="Available Units" class="p-2 border rounded" min="1" required>
+                        <input id="hostel-price" type="number" placeholder="Price per Unit" class="p-2 border rounded" min="0" required>
+                        <input id="hostel-latitude" type="number" step="any" placeholder="Latitude (e.g., -1.286389)" class="p-2 border rounded" required>
+                        <input id="hostel-longitude" type="number" step="any" placeholder="Longitude (e.g., 36.817223)" class="p-2 border rounded" required>
+                        <select id="unit-category" class="p-2 border rounded" required>
+                            <option value="" disabled selected>Select Unit Category</option>
+                            <option value="Bed Seater">Bed Seater</option>
+                            <option value="Single Room">Single Room</option>
+                            <option value="One Bedroom">One Bedroom</option>
+                            <option value="Studio Room">Studio Room</option>
+                        </select>
+                        <select id="water-availability" class="p-2 border rounded" required>
+                            <option value="" disabled selected>Water Availability</option>
+                            <option value="Inside Unit">Inside Unit</option>
+                            <option value="Outside Unit">Outside Unit</option>
+                        </select>
+                        <select id="power-type" class="p-2 border rounded" required>
+                            <option value="" disabled selected>Power Type</option>
+                            <option value="Per Unit">Per Unit</option>
+                            <option value="Shared">Shared</option>
+                            <option value="Communal">Communal (Landlord Pays)</option>
+                        </select>
+                        <input id="shared-units" type="number" placeholder="Number of Units Sharing Power (if Shared)" class="p-2 border rounded" disabled>
+                        <input id="media-upload" type="file" accept="image/*,video/*" multiple class="p-2 border rounded" required>
+                    </div>
+                    <p id="media-count" class="mt-2 text-sm text-gray-600">Selected: 0/4 files</p>
+                    <button type="submit" class="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Add Hostel</button>
+                </form>
+                <div id="landlord-hostels" class="space-y-4"></div>
+            </div>
+        </div>
+
+        <!-- Admin Portal -->
+        <div id="admin-section" class="hidden">
+            <h2 class="text-2xl font-bold mb-4">Admin Portal</h2>
+            <div id="admin-login" class="mb-6">
+                <h3 class="text-xl font-bold mb-2">Admin Login</h3>
+                <form id="admin-login-form" class="space-y-4">
+                    <input id="admin-email" type="email" placeholder="Email" class="w-full p-2 border rounded" required>
+                    <input id="admin-password" type="password" placeholder="Password" class="w-full p-2 border rounded" required>
+                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Login</button>
+                </form>
+            </div>
+            <div id="admin-content" class="hidden">
+                <h3 class="text-xl font-bold mb-2">Verify Landlords</h3>
+                <div id="landlord-list" class="space-y-4"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simulated backend using localStorage
+        const db = {
+            hostels: JSON.parse(localStorage.getItem('hostels')) || [],
+            bookings: JSON.parse(localStorage.getItem('bookings')) || [],
+            landlords: JSON.parse(localStorage.getItem('landlords')) || [],
+            currentLandlord: JSON.parse(localStorage.getItem('currentLandlord')) || null,
+            currentAdmin: JSON.parse(localStorage.getItem('currentAdmin')) || null,
+            save() {
+                localStorage.setItem('hostels', JSON.stringify(this.hostels));
+                localStorage.setItem('bookings', JSON.stringify(this.bookings));
+                localStorage.setItem('landlords', JSON.stringify(this.landlords));
+                localStorage.setItem('currentLandlord', JSON.stringify(this.currentLandlord));
+                localStorage.setItem('currentAdmin', JSON.stringify(this.currentAdmin));
+            }
+        };
+
+        // Show specific section
+        function showSection(section) {
+            document.querySelectorAll('#app > div:not(:first-child)').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`${section}-section`).classList.remove('hidden');
+            if (section === 'student') renderHostelList();
+            if (section === 'agent') renderAgentBookings();
+            if (section === 'landlord') renderLandlordPortal();
+            if (section === 'admin') renderAdminPortal();
+        }
+
+        // Landlord Portal: Render based on auth state
+        function renderLandlordPortal() {
+            const authDiv = document.getElementById('landlord-auth');
+            const loginDiv = document.getElementById('landlord-login');
+            const signupDiv = document.getElementById('landlord-signup');
+            const verificationDiv = document.getElementById('landlord-verification');
+            const contentDiv = document.getElementById('landlord-content');
+
+            authDiv.classList.remove('hidden');
+            loginDiv.classList.add('hidden');
+            signupDiv.classList.add('hidden');
+            verificationDiv.classList.add('hidden');
+            contentDiv.classList.add('hidden');
+
+            if (!db.currentLandlord) {
+                showLandlordLogin();
+            } else if (!db.currentLandlord.verified) {
+                verificationDiv.classList.remove('hidden');
+            } else {
+                authDiv.classList.add('hidden');
+                contentDiv.classList.remove('hidden');
+                renderLandlordHostels();
+            }
+        }
+
+        // Landlord Portal: Show login
+        function showLandlordLogin() {
+            document.getElementById('landlord-login').classList.remove('hidden');
+            document.getElementById('landlord-signup').classList.add('hidden');
+        }
+
+        // Landlord Portal: Show signup
+        function showLandlordSignup() {
+            document.getElementById('landlord-signup').classList.remove('hidden');
+            document.getElementById('landlord-login').classList.add('hidden');
+        }
+
+        // Landlord Portal: Handle signup
+        document.getElementById('signup-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('signup-email').value;
+            const password = document.getElementById('signup-password').value;
+
+            if (db.landlords.find(l => l.email === email)) {
+                alert('Email already exists!');
+                return;
+            }
+
+            const landlord = {
+                id: `landlord-${Date.now()}`,
+                email,
+                password, // Note: In a real app, hash passwords
+                verified: false
+            };
+            db.landlords.push(landlord);
+            db.save();
+            alert('Signup successful! Awaiting admin verification.');
+            showLandlordLogin();
+            document.getElementById('signup-form').reset();
+        });
+
+        // Landlord Portal: Handle login
+        document.getElementById('login-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+
+            const landlord = db.landlords.find(l => l.email === email && l.password === password);
+            if (landlord) {
+                db.currentLandlord = landlord;
+                db.save();
+                renderLandlordPortal();
+            } else {
+                alert('Invalid email or password!');
+            }
+        });
+
+        // Admin Portal: Render based on auth state
+        function renderAdminPortal() {
+            const loginDiv = document.getElementById('admin-login');
+            const contentDiv = document.getElementById('admin-content');
+
+            loginDiv.classList.remove('hidden');
+            contentDiv.classList.add('hidden');
+
+            if (db.currentAdmin) {
+                loginDiv.classList.add('hidden');
+                contentDiv.classList.remove('hidden');
+                renderLandlordList();
+            }
+        }
+
+        // Admin Portal: Handle login
+        document.getElementById('admin-login-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('admin-email').value;
+            const password = document.getElementById('admin-password').value;
+
+            // Hardcoded admin credentials (for demo)
+            if (email === 'admin@xai.com' && password === 'admin123') {
+                db.currentAdmin = { email };
+                db.save();
+                renderAdminPortal();
+            } else {
+                alert('Invalid admin credentials!');
+            }
+        });
+
+        // Admin Portal: Render landlord list for verification
+        function renderLandlordList() {
+            const landlordList = document.getElementById('landlord-list');
+            landlordList.innerHTML = '';
+            db.landlords.forEach(landlord => {
+                const card = document.createElement('div');
+                card.className = 'bg-white p-4 rounded-lg shadow flex justify-between items-center';
+                card.innerHTML = `
+                    <div>
+                        <p>Email: ${landlord.email}</p>
+                        <p>Status: ${landlord.verified ? 'Verified' : 'Unverified'}</p>
+                    </div>
+                    ${!landlord.verified ? `<button onclick="verifyLandlord('${landlord.id}')" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Verify</button>` : ''}
+                `;
+                landlordList.appendChild(card);
+            });
+        }
+
+        // Admin Portal: Verify landlord
+        function verifyLandlord(landlordId) {
+            const landlord = db.landlords.find(l => l.id === landlordId);
+            if (landlord) {
+                landlord.verified = true;
+                db.save();
+                renderLandlordList();
+                if (db.currentLandlord && db.currentLandlord.id === landlordId) {
+                    db.currentLandlord.verified = true;
+                    db.save();
+                    renderLandlordPortal();
+                }
+            }
+        }
+
+        // Student Portal: Render hostel list
+        function renderHostelList(search = '') {
+            const hostelList = document.getElementById('hostel-list');
+            hostelList.innerHTML = '';
+            const filteredHostels = db.hostels.filter(h =>
+                h.verified &&
+                h.units > 0 &&
+                (h.name.toLowerCase().includes(search.toLowerCase()) ||
+                 h.location.toLowerCase().includes(search.toLowerCase()))
+            );
+            filteredHostels.forEach(hostel => {
+                const card = document.createElement('div');
+                card.className = 'bg-white p-4 rounded-lg shadow';
+                let powerDescription = hostel.powerType === 'Per Unit' ? 'Power: Per Unit' :
+                    hostel.powerType === 'Communal' ? 'Power: Communal (Landlord Pays)' :
+                    `Power: Shared with ${hostel.sharedUnits} other units`;
+                card.innerHTML = `
+                    <h3 class="text-xl font-bold">${hostel.name}</h3>
+                    <p>Location: ${hostel.location}</p>
+                    <p>Coordinates: (${hostel.latitude}, ${hostel.longitude})</p>
+                    <p>Category: ${hostel.category}</p>
+                    <p>Units Available: ${hostel.units}</p>
+                    <p>Price: $${hostel.price}/month</p>
+                    <p>Water: ${hostel.waterAvailability}</p>
+                    <p>${powerDescription}</p>
+                    <div class="grid grid-cols-2 gap-2 mt-2">
+                        ${hostel.media.map(m => `
+                            ${m.type === 'image' ? `<img src="${m.url}" alt="Hostel Image" class="w-full h-24 object-cover rounded">` :
+                            `<video src="${m.url}" controls class="w-full h-24 object-cover rounded"></video>`}
+                        `).join('')}
+                    </div>
+                    <button onclick="bookHostel('${hostel.id}')" class="mt-2 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Book Now</button>
+                `;
+                hostelList.appendChild(card);
+            });
+        }
+
+        // Student Portal: Book a hostel
+        function bookHostel(hostelId) {
+            const hostel = db.hostels.find(h => h.id === hostelId);
+            if (hostel && hostel.units > 0 && hostel.verified) {
+                hostel.units -= 1;
+                db.bookings.push({
+                    id: `booking-${Date.now()}`,
+                    hostelId,
+                    student: 'Student-' + Math.random().toString(36).substr(2, 5),
+                    date: new Date().toISOString()
+                });
+                db.save();
+                alert('Booking successful!');
+                renderHostelList(document.getElementById('search-input').value);
+            } else {
+                alert('No units available or hostel not verified!');
+            }
+        }
+
+        // Agent Portal: Render bookings
+        function renderAgentBookings() {
+            const bookingsDiv = document.getElementById('agent-bookings');
+            bookingsDiv.innerHTML = '';
+            db.bookings.forEach(booking => {
+                const hostel = db.hostels.find(h => h.id === booking.hostelId);
+                const card = document.createElement('div');
+                card.className = 'bg-white p-4 rounded-lg shadow';
+                card.innerHTML = `
+                    <p>Booking ID: ${booking.id}</p>
+                    <p>Hostel: ${hostel ? hostel.name : 'Unknown'}</p>
+                    <p>Student: ${booking.student}</p>
+                    <p>Date: ${new Date(booking.date).toLocaleString()}</p>
+                `;
+                bookingsDiv.appendChild(card);
+            });
+        }
+
+        // Landlord Portal: Render hostels
+        function renderLandlordHostels() {
+            const hostelsDiv = document.getElementById('landlord-hostels');
+            hostelsDiv.innerHTML = '';
+            db.hostels.filter(h => h.landlordId === db.currentLandlord.id).forEach(hostel => {
+                const card = document.createElement('div');
+                card.className = 'bg-white p-4 rounded-lg shadow';
+                let powerDescription = hostel.powerType === 'Per Unit' ? 'Power: Per Unit' :
+                    hostel.powerType === 'Communal' ? 'Power: Communal (Landlord Pays)' :
+                    `Power: Shared with ${hostel.sharedUnits} other units`;
+                card.innerHTML = `
+                    <h3 class="text-xl font-bold">${hostel.name}</h3>
+                    <p>Location: ${hostel.location}</p>
+                    <p>Coordinates: (${hostel.latitude}, ${hostel.longitude})</p>
+                    <p>Category: ${hostel.category}</p>
+                    <p>Units Available: ${hostel.units}</p>
+                    <p>Price: $${hostel.price}/month</p>
+                    <p>Water: ${hostel.waterAvailability}</p>
+                    <p>${powerDescription}</p>
+                    <p>Status: ${hostel.verified ? 'Verified' : 'Unverified'}</p>
+                    <div class="grid grid-cols-2 gap-2 mt-2">
+                        ${hostel.media.map(m => `
+                            ${m.type === 'image' ? `<img src="${m.url}" alt="Hostel Image" class="w-full h-24 object-cover rounded">` :
+                            `<video src="${m.url}" controls class="w-full h-24 object-cover rounded"></video>`}
+                        `).join('')}
+                    </div>
+                    <button onclick="deleteHostel('${hostel.id}')" class="mt-2 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Delete</button>
+                `;
+                hostelsDiv.appendChild(card);
+            });
+        }
+
+        // Landlord Portal: Add hostel
+        document.getElementById('hostel-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (!db.currentLandlord || !db.currentLandlord.verified) {
+                alert('You must be a verified landlord to add a hostel!');
+                return;
+            }
+
+            const files = document.getElementById('media-upload').files;
+            if (files.length > 4) {
+                alert('Maximum 4 images/videos allowed!');
+                return;
+            }
+
+            const latitude = parseFloat(document.getElementById('hostel-latitude').value);
+            const longitude = parseFloat(document.getElementById('hostel-longitude').value);
+            if (isNaN(latitude) || isNaN(longitude) || latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
+                alert('Please enter valid coordinates (Latitude: -90 to 90, Longitude: -180 to 180).');
+                return;
+            }
+
+            const media = Array.from(files).map(file => ({
+                type: file.type.startsWith('image') ? 'image' : 'video',
+                url: URL.createObjectURL(file) // Simulate upload with object URL
+            }));
+            const hostel = {
+                id: `hostel-${Date.now()}`,
+                landlordId: db.currentLandlord.id,
+                name: document.getElementById('hostel-name').value,
+                location: document.getElementById('hostel-location').value,
+                units: parseInt(document.getElementById('hostel-units').value),
+                price: parseInt(document.getElementById('hostel-price').value),
+                latitude,
+                longitude,
+                category: document.getElementById('unit-category').value,
+                waterAvailability: document.getElementById('water-availability').value,
+                powerType: document.getElementById('power-type').value,
+                sharedUnits: document.getElementById('shared-units').value || 0,
+                media,
+                verified: !isNaN(latitude) && !isNaN(longitude)
+            };
+            db.hostels.push(hostel);
+            db.save();
+            document.getElementById('hostel-form').reset();
+            document.getElementById('shared-units').disabled = true;
+            document.getElementById('media-count').textContent = 'Selected: 0/4 files';
+            renderLandlordHostels();
+        });
+
+        // Landlord Portal: Delete hostel
+        function deleteHostel(hostelId) {
+            if (!db.currentLandlord || !db.currentLandlord.verified) {
+                alert('You must be a verified landlord to delete a hostel!');
+                return;
+            }
+            const hostel = db.hostels.find(h => h.id === hostelId);
+            if (hostel && hostel.landlordId === db.currentLandlord.id) {
+                if (confirm('Are you sure you want to delete this hostel and its bookings?')) {
+                    db.hostels = db.hostels.filter(h => h.id !== hostelId);
+                    db.bookings = db.bookings.filter(b => b.hostelId !== hostelId);
+                    db.save();
+                    renderLandlordHostels();
+                }
+            } else {
+                alert('You can only delete your own hostels!');
+            }
+        }
+
+        // Search functionality
+        document.getElementById('search-input').addEventListener('input', (e) => {
+            renderHostelList(e.target.value);
+        });
+
+        // Enable/disable shared units input based on power type
+        document.getElementById('power-type').addEventListener('change', (e) => {
+            const sharedUnitsInput = document.getElementById('shared-units');
+            sharedUnitsInput.disabled = e.target.value !== 'Shared';
+            sharedUnitsInput.required = e.target.value === 'Shared';
+        });
+
+        // Update media count
+        document.getElementById('media-upload').addEventListener('change', (e) => {
+            const count = e.target.files.length;
+            document.getElementById('media-count').textContent = `Selected: ${count}/4 files`;
+            if (count > 4) {
+                alert('Maximum 4 images/videos allowed!');
+                e.target.value = '';
+                document.getElementById('media-count').textContent = 'Selected: 0/4 files';
+            }
+        });
+
+        // Initialize
+        showSection('student');
+    </script>
+</body>
+</html>
